@@ -10,8 +10,8 @@ void encode(message_t *message, unsigned char *encoded) {
     encode_byte(message->command, encoded+2);
     
     
-    for (int i=0; i<MESSAGE_DATA_SIZE; i++) {
-        encode_byte(message->data[i], encoded+4+i*2);
+    for (int i=0; i<NUM_PARAMETERS; i++) {
+        encode_byte(message->parameters[i], encoded+4+i*2);
     }
 }
 
