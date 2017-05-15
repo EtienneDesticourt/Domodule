@@ -2,37 +2,38 @@
 #include "encoder.h"
 #include "protocol.h"
 
-char state = STATE_IDLE;
+char state = STATE_MESS_1T2T_LO;//STATE_IDLE;
 char last_pulse;
 char num_wake_pulses = 0x00;
 message_t message;
 char received_byte = 0x00;
 char num_received_bytes = 0x00;
 char num_received_bits = 0x00;
+int width = 0;
 
-void decode(char low_pulse) {
+void decode(char edge) {
     int pulse_width = calc_pulse_width();
     switch (state) {
         case STATE_IDLE:
-            if (low_pulse == 1) {
+            if (edge == NEGATIVE_EDGE) {
                 state = STATE_WAKE;
             }
             break;
         case STATE_WAKE:
             // Wake up signal: 5-40 zeros
-            if (low_pulse == 1 && pulse_width == 1 && num_wake_pulses < 40) {
+            if (edge == NEGATIVE_EDGE && pulse_width == 1 && num_wake_pulses < 40) {
                 num_wake_pulses += 1;
                 break;
             }
             // First sync: 3T high
-            else if (low_pulse == 1 && pulse_width == 3 && num_wake_pulses > 4) {
+            else if (edge == NEGATIVE_EDGE && pulse_width == 3 && num_wake_pulses > 4) {
                 state = STATE_SYNC;
                 break;
             }
             reset_FSM();
             break;
         case STATE_SYNC:
-            if (low_pulse == 0 && pulse_width == 3) {
+            if (edge == POSITIVE_EDGE && pulse_width == 3) {
                 state = STATE_FILL;
             }
             else { // No correct second sync signal (3T low) following the first
@@ -40,7 +41,7 @@ void decode(char low_pulse) {
             }
             break;
         case STATE_FILL:
-            if (low_pulse == 1 && pulse_width == 1) { // Filler 0 to set back to low
+            if (edge == POSITIVE_EDGE && pulse_width == 1) { // Filler 0 to set back to low
                 state = STATE_MESS_1T2T_LO;
             }
             else {
@@ -48,7 +49,7 @@ void decode(char low_pulse) {
             }
             break;
         case STATE_MESS_1T2T_LO:
-            if (low_pulse == 1) {
+            if (edge == POSITIVE_EDGE) {
                 if (pulse_width == 1) {
                     state = STATE_MESS_1T_HI;
                     break;
@@ -63,7 +64,7 @@ void decode(char low_pulse) {
             reset_FSM();
             break;
         case STATE_MESS_1T_HI:
-            if (low_pulse == 0 && pulse_width == 1) {
+            if (edge == NEGATIVE_EDGE && pulse_width == 1) {
                 num_received_bits++; // 'Write' 0 (byte starts cleared)
                 state = STATE_MESS_1T2T_LO;
             }
@@ -72,7 +73,7 @@ void decode(char low_pulse) {
             }
             break;
         case STATE_MESS_1T2T_HI:
-            if (low_pulse == 1) {
+            if (edge == NEGATIVE_EDGE) {
                 if (pulse_width == 1) {
                     state = STATE_MESS_1T_LO;
                     break;
@@ -86,7 +87,7 @@ void decode(char low_pulse) {
             reset_FSM();
             break;
         case STATE_MESS_1T_LO:
-            if (low_pulse == 0 && pulse_width == 1) {
+            if (edge == POSITIVE_EDGE && pulse_width == 1) {
                 set_bit(&received_byte, num_received_bits); // Write 1
                 num_received_bits++;
                 state = STATE_MESS_1T2T_HI;
@@ -136,5 +137,5 @@ void reset_FSM() {
 }
 
 char calc_pulse_width() {
-    return 0;
+    return width;
 }

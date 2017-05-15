@@ -28,10 +28,10 @@ void encode_byte(unsigned char byte, unsigned char *encoded) {
         encoded_byte = 0x00;
         for (int i=0; i<4; i++) {
             if ((byte >> i+4*j) & 1) {
-                set_bit(&encoded_byte, i*2); //LO-HI
+                set_bit(&encoded_byte, i*2+1); //LO-HI
             }
             else {
-                set_bit(&encoded_byte, i*2+1); //HI-LO
+                set_bit(&encoded_byte, i*2); //HI-LO
             }
         }
         encoded[j] = encoded_byte;
@@ -47,7 +47,7 @@ void set_bit(unsigned char *encoded, int position) {
     *encoded |= (1 << position);
     /*
     int byte_offset = position / 8;
-    int bit_offset = position - byte_offset;
+    int bit_offset = position - byte_offset * 8;
     *(encoded+byte_offset) |= (1 << bit_offset);
     */
 }
