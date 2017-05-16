@@ -5,6 +5,9 @@
 decoder_ctx DCTX;
 
 void decode(char edge) {
+    if (DCTX.new_message_flag == 1) {
+        return;        
+    }
     int pulse_width = calc_pulse_width();
     switch (DCTX.state) {
         case STATE_IDLE:
@@ -110,6 +113,7 @@ void decode(char edge) {
             DCTX.message.parameters[1] = DCTX.received_byte;
         }
         else {
+            DCTX.new_message_flag = 1;
             reset_FSM();
         }
         DCTX.received_byte = 0x00;
@@ -123,6 +127,7 @@ void record_pulse_time() {
 
 void init_decoder_context() {
     reset_FSM();
+    DCTX.new_message_flag = 0x00;
 }
 
 void reset_FSM() {

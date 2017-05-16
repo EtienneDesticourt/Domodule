@@ -20,7 +20,7 @@ typedef struct decoder_context {
     char state;
     char num_wake_pulses;
     message_t message;
-    char cleared;
+    char new_message_flag;
     char received_byte;
     char num_received_bytes;
     char num_received_bits;
