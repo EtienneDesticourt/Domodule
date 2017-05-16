@@ -1,8 +1,22 @@
 #include <xc.h>
 #include "encoder.h"
 #include "decoder.h"
+#include "rf_receiver.h"
 
-void main(void) {
+
+void interrupt isr() {
+    handle_receiver_interrupts();
+}
+
+void main(void) { 
+    init_decoder_context();
+    setup_receiver_interrupts();
+    
+    while (1);
+    
+    
+    /*
+    
     message_t data;
     data.target = 0x0C;
     data.command = 0x1D;
@@ -43,6 +57,6 @@ void main(void) {
         temp += 1;
     }
     
-    
+    */
     
 }
