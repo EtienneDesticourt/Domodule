@@ -1,35 +1,34 @@
 #include <pic18f1330.h>
-
 #include "rf_transmitter.h"
 #include "encoder.h"
 
 transmitter_ctx TCTX;
-//Stuck in WAKE/SYNC loop. Reverse bytes
+
 const unsigned char WAKE_SIGNAL[2] = {0b01010101, 0b01010101};//,
                                       //0b10101010, 0b10101010,
                                       //0b10101010, 0b10101010,
                                       //0b10101010, 0b10101010}; // 32 * 0
 
-// 3T HI, 3T LO, HI-LO (filler 0))
+// 3T HI, 3T LO, HI-LO (filler 0)
 const unsigned char SYNC_SIGNAL[1] = {0b01000111};
 
 unsigned char encoded_message[8] = {0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x00, 0x00, 0x00};
 
 void init_transmitter_context() {
-    TCTX.sent_flag = 1;    
+    TCTX.sent_flag = 1;
 }
 
 void setup_transmitter_interrupt() {
     // Enables global interrupts
     INTCONbits.GIE = 1;
+    // Setup internal clock
+    OSCCONbits.IRCF = 0b000; // Set internal clock to 31kHz
     // Configure Timer 0
     T0CONbits.TMR0ON = 1; // Turns on timer
     T0CONbits.T016BIT = 1; // Configured as 8 bit weirdly
     T0CONbits.T0CS = 0; // Use internal clock
-    T0CONbits.T0PS2 = 1; // 1:32 prescaler for about 1kHz interrupt
-    T0CONbits.T0PS1 = 1; // 1:32 prescaler for about 1kHz interrupt
-    T0CONbits.T0PS0 = 1; // 1:32 prescaler for about 1kHz interrupt
+    T0CONbits.T0PS = 0b010;
     // Enables the Timer 0 interrupt
     INTCONbits.T0IF = 0; 
     INTCONbits.T0IE = 1;

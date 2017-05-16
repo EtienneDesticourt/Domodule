@@ -12,7 +12,21 @@ void setup_receiver_interrupts() {
     INTCON3bits.INT2IE = 1; // Enable
     INTCON3bits.INT3IE = 1;
     INTCON2bits.INTEDG2 = 1; // On rising edge
-    INTCON2bits.INTEDG3 = 0; // On falling edge    
+    INTCON2bits.INTEDG3 = 0; // On falling edge
+    // Setup internal clock
+    OSCCONbits.IRCF = 0b000; // Set internal clock to 31kHz
+    
+    // Configures Timer 0
+    T0CONbits.TMR0ON = 1; // Turns on timer
+    T0CONbits.T016BIT = 1; // Configured as 8 bit weirdly
+    T0CONbits.T0CS = 0; // Use internal clock
+    // Sets 1:2 prescaler on FOSC/4 : FOSC/8 ~= 4kHz.
+    T0CONbits.T0PS = 0b000;
+    /*
+    // Enables Timer 0 interrupt to calculate pulse width
+    INTCONbits.T0IF = 0; 
+    INTCONbits.T0IE = 1;
+     * */
 }
 
 void handle_receiver_interrupts() {
@@ -25,4 +39,9 @@ void handle_receiver_interrupts() {
         decode(NEGATIVE_EDGE);
         INTCON3bits.INT3IF = 0;
     }
+    /*
+    if (INTCONbits.T0IF == 1) {
+        INTCONbits.T0IF = 0;
+    }
+     * */
 }

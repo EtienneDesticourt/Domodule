@@ -1,3 +1,4 @@
+#include <pic18f1330.h>
 #include "decoder.h"
 #include "encoder.h"
 #include "protocol.h"
@@ -8,7 +9,8 @@ void decode(char edge) {
     if (DCTX.new_message_flag == 1) {
         return;        
     }
-    int pulse_width = calc_pulse_width();
+    char pulse_width = calc_pulse_width();
+    record_pulse_time();
     switch (DCTX.state) {
         case STATE_IDLE:
             if (edge == NEGATIVE_EDGE) {
@@ -118,11 +120,10 @@ void decode(char edge) {
         }
         DCTX.received_byte = 0x00;
     }
-    record_pulse_time();
 }
 
 void record_pulse_time() {
-    
+    DCTX.last_pulse_time = TMR0L;   
 }
 
 void init_decoder_context() {
@@ -138,6 +139,20 @@ void reset_FSM() {
     DCTX.received_byte = 0x00;
 }
 
-char calc_pulse_width() {
-    return DCTX.width;
+unsigned char calc_pulse_width() {
+    // Overflow will solve itself (3-254=7)
+    unsigned char elapsed = ((unsigned char)TMR0L - DCTX.last_pulse_time);
+    // timer runs at 4kHz so 4 counts for one pulse + margin
+    if (elapsed > 0 && elapsed <= 6) {
+        return 1;
+    }    
+    if (elapsed > 6 && elapsed <= 10) {
+        return 2;
+    }    
+    if (elapsed > 10 && elapsed <= 14) {
+        return 3;
+    }    
+    else {
+        return -1;
+    }
 }

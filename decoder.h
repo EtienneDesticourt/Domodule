@@ -17,14 +17,14 @@
 
 
 typedef struct decoder_context {
-    char state;
-    char num_wake_pulses;
+    unsigned char state;
+    unsigned char num_wake_pulses;
     message_t message;
-    char new_message_flag;
-    char received_byte;
-    char num_received_bytes;
-    char num_received_bits;
-    int width;
+    unsigned char new_message_flag;
+    unsigned char received_byte;
+    unsigned char num_received_bytes;
+    unsigned char num_received_bits;
+    unsigned char last_pulse_time;
 } decoder_ctx;
 
 extern decoder_ctx DCTX;

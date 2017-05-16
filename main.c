@@ -1,4 +1,5 @@
 #include <xc.h>
+#include "protocol.h"
 #include "encoder.h"
 #include "decoder.h"
 #include "rf_receiver.h"
@@ -6,13 +7,15 @@
 
 
 void interrupt isr() {
-    //handle_receiver_interrupts();
-    handle_transmitter_interrupts();
+    if (role == RECEIVER_ROLE) {
+        handle_receiver_interrupts();        
+    }
+    else {
+        handle_transmitter_interrupts();        
+    }
 }
 
 void main(void) { 
-    
-    
     init_transmitter_context();
     setup_transmitter_interrupt();
     

@@ -1,7 +1,12 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-const int NUM_PARAMETERS = 2;
+#define RECEIVER_ROLE 0
+#define TRANSMITTER_ROLE 1
+
+const char NUM_PARAMETERS = 2;
+
+extern char role;
 
 typedef struct message {
     unsigned char target;
