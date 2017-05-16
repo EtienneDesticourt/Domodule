@@ -6,12 +6,12 @@
  * @param encoded The char array to encode it into
  */
 void encode(message_t *message, unsigned char *encoded) {
-    encode_byte(message->target, encoded);
-    encode_byte(message->command, encoded+2);
+    encode_byte(&message->target, encoded);
+    encode_byte(&message->command, encoded+2);
     
     
     for (int i=0; i<NUM_PARAMETERS; i++) {
-        encode_byte(message->parameters[i], encoded+4+i*2);
+        encode_byte(&message->parameters[i], encoded+4+i*2);
     }
 }
 
@@ -21,20 +21,20 @@ void encode(message_t *message, unsigned char *encoded) {
  * @param byte The byte to encode
  * @param encoded The cleared char array of size >= 2 to encode the byte into
  */
-void encode_byte(unsigned char byte, unsigned char *encoded) {
-    unsigned char encoded_byte;
-    
+void encode_byte(unsigned char *byte, unsigned char *encoded) {    
     for (int j=0; j<2; j++) {
-        encoded_byte = 0x00;
         for (int i=0; i<4; i++) {
-            if ((byte >> i+4*j) & 1) {
-                set_bit(&encoded_byte, i*2+1); //LO-HI
+            encoded[j] |= (1 << i*2+((*byte >> i+4*j) & 1));
+            /*
+             if ((*byte >> i+4*j) & 1) { // Check bit at current bit in byte
+                encoded[j] |= (1 << i*2+1); // LO-HI: 0
             }
             else {
-                set_bit(&encoded_byte, i*2); //HI-LO
+                encoded[j] |= (1 << i*2); // HI-LO: 1
             }
+             * Condensed above.
+            */
         }
-        encoded[j] = encoded_byte;
     }
 }
 
@@ -51,4 +51,3 @@ void set_bit(unsigned char *encoded, int position) {
     *(encoded+byte_offset) |= (1 << bit_offset);
     */
 }
-

@@ -2,21 +2,36 @@
 #include "encoder.h"
 #include "decoder.h"
 #include "rf_receiver.h"
+#include "rf_transmitter.h"
 
 
 void interrupt isr() {
-    handle_receiver_interrupts();
+    //handle_receiver_interrupts();
+    handle_transmitter_interrupts();
 }
 
 void main(void) { 
-    init_decoder_context();
-    setup_receiver_interrupts();
+    
+    
+    init_transmitter_context();
+    setup_transmitter_interrupt();
+    
+    
+    message_t data;
+    data.target = 0x0C;
+    data.command = 0x1D;
+    data.parameters[0] = 0xD1;
+    data.parameters[1] = 0x01;
+    
+    send_message(&data);
     
     while (1);
     
     
     /*
-    
+     
+    init_decoder_context();
+    setup_receiver_interrupts();
     message_t data;
     data.target = 0x0C;
     data.command = 0x1D;
@@ -58,5 +73,4 @@ void main(void) {
     }
     
     */
-    
 }
